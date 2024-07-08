@@ -1,0 +1,53 @@
+[
+  {
+    "Set": "Core Set",
+    "Qty": "10",
+    "Name": "Explorer",
+    "Faction": "Unaligned",
+    "Type": "Ship",
+    "Cost": "2",
+    "Text": "Add 2 Trade Scrap: Add 2 Combat",
+    "Defense": "",
+    "Ref": "explorer",
+    "PrimaryAction": [
+      {
+        "amount": 2,
+        "type": "GET_MONEY"
+      }
+    ]
+  },
+  {
+    "Set": "Core Set",
+    "Qty": "16",
+    "Name": "Scout",
+    "Faction": "Unaligned",
+    "Type": "Ship",
+    "Cost": "",
+    "Text": "Add 1 Trade",
+    "Defense": "",
+    "Ref": "scout",
+    "PrimaryAction": [
+      {
+        "amount": 1,
+        "type": "GET_MONEY"
+      }
+    ]
+  },
+  {
+    "Set": "Core Set",
+    "Qty": "4",
+    "Name": "Viper",
+    "Faction": "Unaligned",
+    "Type": "Ship",
+    "Cost": "",
+    "Text": "Add 1 Combat",
+    "Defense": "",
+    "Ref": "viper",
+    "PrimaryAction": [
+      {
+        "amount": 1,
+        "type": "GET_ATTACK"
+      }
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "Set": "Core Set",
+    "Qty": "16",
+    "Name": "Scout",
+    "Faction": "Unaligned",
+    "Type": "Ship",
+    "Cost": "",
+    "Text": "Add 1 Trade",
+    "Defense": ""
+  },
+  {
+    "Set": "Core Set",
+    "Qty": "4",
+    "Name": "Viper",
+    "Faction": "Unaligned",
+    "Type": "Ship",
+    "Cost": "",
+    "Text": "Add 1 Combat",
+    "Defense": ""
+  }
+]

@@ -1,4 +1,4 @@
-export function TicTacToeBoard({ ctx, G, moves }) {
+export function SRGameBoard({ ctx, G, moves }) {
   const onClick = (id) => moves.clickCell(id);
 
   let winner = null;
