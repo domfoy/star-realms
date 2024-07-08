@@ -1,0 +1,25 @@
+(
+$extractActions := function($text) {(
+    $splits :=  $split($text, / Ally: | Scrap: /);
+    $secondSplit := $split($firstSplit[1], " Scrap: ");
+
+    {
+        "FirstAction": $firstSplit[0],
+        "AlliedAction": $secondSplit[0],
+        "DiscardAction": $secondSplit[1]
+    }
+)};
+
+$map(
+    $,
+    function($card) {
+        $merge([
+            $card,
+            {
+                "Ref": $card.Name ~> $replace(" ", "_") ~> $lowercase
+            },
+            $extractActions($card.Text)
+        ])
+    }
+)
+)
