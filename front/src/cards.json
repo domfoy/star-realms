@@ -506,28 +506,6 @@
     "Ref": "trading_post"
   },
   {
-    "Set": "Core Set",
-    "Qty": "12",
-    "Name": "1 Authority | 5 Authority",
-    "Faction": "",
-    "Type": "Score Card",
-    "Cost": "",
-    "Text": "1 Authority | 5 Authority",
-    "Defense": "",
-    "Ref": "1_authority_|_5_authority"
-  },
-  {
-    "Set": "Core Set",
-    "Qty": "6",
-    "Name": "10 Authority | 20 Authority",
-    "Faction": "",
-    "Type": "Score Card",
-    "Cost": "",
-    "Text": "10 Authority | 20 Authority",
-    "Defense": "",
-    "Ref": "10_authority_|_20_authority"
-  },
-  {
     "Set": "Year 1 Promos",
     "Qty": "2",
     "Name": "Battle Barge",
@@ -1879,28 +1857,6 @@
     "Text": "Add 2 Trade Scrap: Add 2 Combat",
     "Defense": "",
     "Ref": "explorer"
-  },
-  {
-    "Set": "Colony Wars",
-    "Qty": "6",
-    "Name": "10 Authority | 20 Authority",
-    "Faction": "",
-    "Type": "Score Card",
-    "Cost": "",
-    "Text": "10 Authority | 20 Authority",
-    "Defense": "",
-    "Ref": "10_authority_|_20_authority"
-  },
-  {
-    "Set": "Colony Wars",
-    "Qty": "12",
-    "Name": "1 Authority | 5 Authority",
-    "Faction": "",
-    "Type": "Score Card",
-    "Cost": "",
-    "Text": "1 Authority | 5 Authority",
-    "Defense": "",
-    "Ref": "1_authority_|_5_authority"
   },
   {
     "Set": "United: Assault",

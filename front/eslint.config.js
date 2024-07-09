@@ -13,4 +13,9 @@ export default [
   { settings: { react: { version: "detect" } } }, // Needed by pluginReactConfig
   ...fixupConfigRules(pluginReactConfig),
   eslintPluginPrettierRecommended,
+  {
+    rules: {
+      "react/prop-types": 0,
+    },
+  },
 ];
