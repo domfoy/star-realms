@@ -1,37 +1,33 @@
-import { cardList } from "../consts.js";
+import { cardDictionary } from "../consts.js";
 
-const NAME_BY_REF_REGEX = /^(.+)_(\d)$/;
+const NAME_BY_FULL_REF_REGEX = /^(.+)_(\d)$/;
 
-function getCardNameByRef(ref) {
-  const result = NAME_BY_REF_REGEX.exec(ref);
+export function getCardNameByRef(cardRef) {
+  const result = NAME_BY_FULL_REF_REGEX.exec(cardRef);
 
   return result[1];
 }
 
-export function findCardByRef(fullRef) {
-  const ref = getCardNameByRef(fullRef);
+export function getCardByRef(cardRef) {
+  const cardName = getCardNameByRef(cardRef);
 
-  return cardList.find((card) => card.Ref === ref);
+  return cardDictionary[cardName];
 }
 
-const ACTION_HANDLERS = {
-  GET_ATTACK: ({ G, playerID, action }) => {
-    G.attacks[playerID] += action.amount;
-  },
-  GET_MONEY: ({ G, playerID, action }) => {
-    G.moneys[playerID] += action.amount;
-  },
-};
+export function addCombat(combatPoints) {
+  return {
+    message: `Add ${combatPoints} Combat`,
+    updateGame: ({ G, playerID }) => {
+      G.attacks[playerID] += combatPoints;
+    },
+  };
+}
 
-export function applyAction(ctx) {
-  const subActions = ctx.action;
-
-  for (const subAction of subActions) {
-    const actionType = subAction.type;
-
-    ACTION_HANDLERS[actionType]({
-      ...ctx,
-      action: subAction,
-    });
-  }
+export function addTrade(tradePoints) {
+  return {
+    message: `Add 2 Trade`,
+    updateGame: ({ G, playerID }) => {
+      G.moneys[playerID] += tradePoints;
+    },
+  };
 }

@@ -1,8 +1,15 @@
 import React, { createContext, useContext } from "react";
+import { useImmerReducer } from "use-immer";
+
+import { initialGame, gameReducer } from "./reducer.js";
+import CARD_ACTIONS from "./game/card-actions/index.js";
+import { Modal } from "./modal-card.jsx";
+
+import { getCardByRef } from "./game/card.js";
 
 const GameContext = createContext(null);
 
-function Card({ name, onCardClick }) {
+function Card({ label, onCardClick }) {
   return (
     <div
       style={{
@@ -31,7 +38,7 @@ function Card({ name, onCardClick }) {
             overflowWrap: "break-word",
           }}
         >
-          {name}
+          {label}
         </div>
       </button>
     </div>
@@ -58,7 +65,7 @@ function Hand({ playerID }) {
       {cardRefs.map((cardRef, cardIndex) => (
         <Card
           key={cardRef}
-          name={cardRef}
+          label={cardRef}
           onCardClick={() => onCardClick(cardIndex)}
         ></Card>
       ))}
@@ -72,8 +79,11 @@ function ActionButton({ playerID }) {
   if (ctx.currentPlayer !== playerID) {
     return null;
   }
+  if (G.hands[playerID].length > 0) {
+    return <button onClick={() => moves.playWholeHand()}>Play all</button>;
+  }
   if (G.attacks[playerID] > 0) {
-    return <button onClick={() => moves.attack()}>Attack!</button>;
+    return <button onClick={() => moves.attack()}>Attack</button>;
   }
   if (G.hands[playerID].length === 0) {
     return <button onClick={() => moves.prepareNextTurn()}>End Turn</button>;
@@ -107,7 +117,7 @@ function PlayerInfo({ playerID }) {
         </>
       ) : null}
       <div>
-        <ActionButton playerID={playerID}>End Turn</ActionButton>
+        <ActionButton playerID={playerID}></ActionButton>
       </div>
     </div>
   );
@@ -143,9 +153,53 @@ function PlayerSide({ playerID }) {
   );
 }
 
+function FullCard({ card }) {
+  return (
+    <section>
+      <h2>{card.name}</h2>
+      {card.scrapAction ? (
+        <button onClick={card.scrapAction.apply}>
+          Scrap: {card.scrapAction.message}
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+function buildFullCard(gameContext, cardRef) {
+  const card = getCardByRef(cardRef);
+  const uiCard = {
+    ...card,
+  };
+
+  const cardActions = CARD_ACTIONS[card.name];
+  const scrapAction = cardActions?.scrapAction;
+  if (scrapAction) {
+    uiCard.scrapAction = {
+      apply: async () => {
+        const scrapContext = await scrapAction?.applyUiAction?.(gameContext, {
+          cardRef,
+        });
+        gameContext.moves.applyScrapAction({ ...scrapContext, cardRef });
+        gameContext.dispatch({ type: "CLOSE_MODAL" });
+      },
+      message: scrapAction.message,
+    };
+  }
+
+  return <FullCard card={uiCard}></FullCard>;
+}
+
 function PlayBoard({ playerID }) {
-  const { G } = useContext(GameContext);
+  const gameContext = useContext(GameContext);
+  const { dispatch, G } = gameContext;
   const cardRefs = G.plays[playerID];
+
+  const openCardModal = (cardRef) => {
+    const fullCard = buildFullCard(gameContext, cardRef);
+
+    dispatch({ component: fullCard, type: "OPEN_MODAL" });
+  };
 
   return (
     <div
@@ -156,10 +210,23 @@ function PlayBoard({ playerID }) {
       }}
     >
       {cardRefs.map((cardRef) => (
-        <Card key={cardRef} name={cardRef}></Card>
+        <Card
+          key={cardRef}
+          label={cardRef}
+          onCardClick={() => openCardModal(cardRef)}
+        ></Card>
       ))}
     </div>
   );
+}
+
+function ExplorerDeck() {
+  const { G, moves } = useContext(GameContext);
+  const name =
+    G.explorerDeckCount > 0
+      ? `explorer (${G.explorerDeckCount})`
+      : `No explorer left`;
+  return <Card label={name} onCardClick={() => moves.buyExplorer()}></Card>;
 }
 
 function CentralRow({ tradeRowCardRefs, flexGrow }) {
@@ -169,15 +236,10 @@ function CentralRow({ tradeRowCardRefs, flexGrow }) {
         display: "flex",
         flexGrow,
         justifyContent: "center",
+        gap: "15px",
       }}
     >
-      <div
-        style={{
-          paddingRight: "5vw",
-        }}
-      >
-        <Card name={"explorer"}></Card>
-      </div>
+      <ExplorerDeck></ExplorerDeck>
       <div
         style={{
           display: "flex",
@@ -185,25 +247,26 @@ function CentralRow({ tradeRowCardRefs, flexGrow }) {
         }}
       >
         {tradeRowCardRefs.map((cardRef) => (
-          <Card key={cardRef} name={cardRef}></Card>
+          <Card key={cardRef} label={cardRef}></Card>
         ))}
       </div>
       <div
         style={{
           display: "flex",
-          paddingLeft: "5vw",
         }}
       >
-        <Card name={"TRADE DECK"}></Card>
-        <Card name={"DISCARD DECK"}></Card>
+        <Card label={"TRADE DECK"}></Card>
+        <Card label={"SCRAP DECK"}></Card>
       </div>
     </div>
   );
 }
 
 export function SRGameBoard(ctx) {
+  const [gameState, dispatch] = useImmerReducer(gameReducer, initialGame);
+
   return (
-    <GameContext.Provider value={ctx}>
+    <GameContext.Provider value={{ ...ctx, dispatch, gameState }}>
       <div
         style={{
           boxSizing: "border-box",
@@ -215,9 +278,14 @@ export function SRGameBoard(ctx) {
           width: "100vw",
         }}
       >
-        {<PlayerSide playerID={"0"}></PlayerSide>}
-        {<CentralRow tradeRowCardRefs={ctx.G.tradeRow}></CentralRow>}
-        {<PlayerSide playerID={"1"}></PlayerSide>}
+        <Modal
+          component={gameState.modalComponent}
+          showModal={gameState.showModal}
+          onClose={() => dispatch({ type: "CLOSE_MODAL" })}
+        />
+        <PlayerSide playerID={"0"}></PlayerSide>
+        <CentralRow tradeRowCardRefs={ctx.G.tradeRow}></CentralRow>
+        <PlayerSide playerID={"1"}></PlayerSide>
       </div>
     </GameContext.Provider>
   );

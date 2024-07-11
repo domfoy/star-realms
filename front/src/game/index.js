@@ -1,5 +1,11 @@
-// import { INVALID_MOVE } from "boardgame.io/dist/cjs/core.js";
-import { attack, playCard, prepareNextTurn } from "./moves.js";
+import {
+  attack,
+  applyScrapAction,
+  buyExplorer,
+  playCard,
+  playWholeHand,
+  prepareNextTurn,
+} from "./moves.js";
 
 import setup from "./setup.js";
 
@@ -13,7 +19,10 @@ export const SRGame = {
   },
   moves: {
     attack,
+    applyScrapAction,
+    buyExplorer,
     playCard,
+    playWholeHand,
     prepareNextTurn,
   },
   setup,

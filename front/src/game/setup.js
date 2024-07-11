@@ -1,8 +1,11 @@
-import { startingDeck as modelStartingDeck, cardList } from "../consts.js";
+import {
+  startingDeck as modelStartingDeck,
+  coreSetCardList,
+} from "../consts.js";
 
 export default function setup({ random, ctx: { numPlayers } }) {
-  const cardRefList = cardList.map((card) => card.Ref);
-  const shuffledCardRefList = random.Shuffle(cardRefList);
+  const cardNameList = coreSetCardList.map((card) => card.name);
+  const shuffledCardRefList = random.Shuffle(cardNameList);
 
   const initialState = {
     attacks: {},
