@@ -2,10 +2,10 @@ import React, { createContext, useContext } from "react";
 import { useImmerReducer } from "use-immer";
 
 import { initialGame, gameReducer } from "./reducer.js";
-import CARD_ACTIONS from "./game/card-actions/index.js";
+import { default as CARD_ACTIONS } from "./game/card-actions/index.js";
 import { Modal } from "./modal-card.jsx";
 
-import { getCardByRef } from "./game/card.js";
+import { getCardByRef, getAbility } from "./game/card.js";
 
 const GameContext = createContext(null);
 
@@ -48,11 +48,11 @@ function Card({ label, onCardClick }) {
 function Hand({ playerID }) {
   const { ctx, G, moves } = useContext(GameContext);
   const cardRefs = G.hands[playerID];
-  const onCardClick = (cardIndex) => {
+  const handleClick = (cardRef) => {
     if (ctx.currentPlayer !== playerID) {
       return;
     }
-    moves.playCard(cardIndex);
+    moves.playCard({ cardRef });
   };
 
   return (
@@ -62,11 +62,11 @@ function Hand({ playerID }) {
         justifyContent: "center",
       }}
     >
-      {cardRefs.map((cardRef, cardIndex) => (
+      {cardRefs.map((cardRef) => (
         <Card
           key={cardRef}
           label={cardRef}
-          onCardClick={() => onCardClick(cardIndex)}
+          onCardClick={() => handleClick(cardRef)}
         ></Card>
       ))}
     </div>
@@ -153,10 +153,12 @@ function PlayerSide({ playerID }) {
   );
 }
 
-function FullCard({ card }) {
+function FullCard({ name, abilities }) {
+  const
+
   return (
     <section>
-      <h2>{card.name}</h2>
+      <h2>{name}</h2>
       {card.scrapAction ? (
         <button onClick={card.scrapAction.apply}>
           Scrap: {card.scrapAction.message}
@@ -168,13 +170,20 @@ function FullCard({ card }) {
 
 function buildFullCard(gameContext, cardRef) {
   const card = getCardByRef(cardRef);
+  const abilities = gameContext.G.abilities
+    .filter(
+      (abilityInfo) => abilityInfo.cardRef === cardRef && !abilityInfo.applied
+    )
+    .map((abilityInfo) => ({
+      ...abilityInfo,
+      ...getAbility(abilityInfo),
+    }));
   const uiCard = {
     ...card,
   };
 
-  const cardActions = CARD_ACTIONS[card.name];
-  const scrapAction = cardActions?.scrapAction;
-  if (scrapAction) {
+
+  if (abilities.length) {
     uiCard.scrapAction = {
       apply: async () => {
         const scrapContext = await scrapAction?.applyUiAction?.(gameContext, {

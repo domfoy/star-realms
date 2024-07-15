@@ -8,6 +8,7 @@ export default function setup({ random, ctx: { numPlayers } }) {
   const shuffledCardRefList = random.Shuffle(cardNameList);
 
   const initialState = {
+    abilities: [],
     attacks: {},
     decks: {},
     discards: {},

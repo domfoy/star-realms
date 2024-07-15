@@ -27,4 +27,5 @@ test("Should setup for 2 players", () => {
   expect(actualState.tradeRow).toHaveLength(5);
   expect(actualState.explorerDeckCount).toBe(10);
   expect(actualState.scrapDeck).toStrictEqual([]);
+  expect(actualState.abilities).toStrictEqual([]);
 });
