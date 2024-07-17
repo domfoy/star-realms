@@ -1,5 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/dist/cjs/core.js";
 
+import { getAbility } from "./ability.js";
 import { getCardNameByRef } from "./card.js";
 import {
   EXPLORER_COST,
@@ -36,12 +37,9 @@ function getAbilityUpdateGame(ctx, abilityRef) {
   const abilityInfo = ctx.G.abilities.find(
     (ability) => ability.ref === abilityRef
   );
-  const action = CARD_ACTIONS[abilityInfo.cardName][abilityInfo.actionType];
+  const ability = getAbility(abilityInfo);
 
-  if (Array.isArray(action)) {
-    return action[abilityInfo.index].updateGame;
-  }
-  return action.updateGame;
+  return ability.updateGame;
 }
 
 function applyAbility(ctx, abilityRef, abilityCtx) {

@@ -35,8 +35,18 @@ export function addTrade(tradePoints) {
 }
 
 export function scrapCardInTradeRow() {
+  const message = "You may scrap a card in the trade row.";
+
   return {
-    message: "You may scrap a card in the trade row.",
+    applyUi: async (gameContext, { cardRef }) => {
+      gameContext.dispatch({
+        cardRef,
+        message,
+        targetDeckIds: ["tradeRow"],
+        type: "INIT_CHOOSE_CARD",
+      });
+    },
+    message,
     updateGame: ({ G }, { scrapedTradeRowCardRef }) => {
       if (!scrapedTradeRowCardRef) {
         return;

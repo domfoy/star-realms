@@ -28,8 +28,9 @@ export const coreSetCardList = coreSetTemplateCardList
   .flat();
 
 export const startingDeck = [
-  ...Array.from({ length: 8 }, (_, index) => `scout_${index + 1}`),
-  ...Array.from({ length: 2 }, (_, index) => `viper_${index + 1}`),
+  // ...Array.from({ length: 8 }, (_, index) => `scout_${index + 1}`),
+  // ...Array.from({ length: 2 }, (_, index) => `viper_${index + 1}`),
+  ...Array.from({ length: 8 }, (_, index) => `battlePod_${index + 1}`),
 ];
 
 const explorer = baseTemplateCardList.find((card) => card.name === "explorer");

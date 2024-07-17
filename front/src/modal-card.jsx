@@ -1,7 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import React, { useContext, useRef, useEffect } from "react";
 import "./modal-card.css";
 
-export function Modal({ component, showModal, onClose }) {
+import { getAbility } from "./game/ability.js";
+import { getCardByRef } from "./game/card.js";
+
+function Modal({ component, onClose }) {
   const modalRef = useRef(null);
 
   useEffect(() => {
@@ -11,7 +14,7 @@ export function Modal({ component, showModal, onClose }) {
       }
     };
 
-    if (showModal) {
+    if (component) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -20,9 +23,9 @@ export function Modal({ component, showModal, onClose }) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showModal, onClose]);
+  }, [component, onClose]);
 
-  if (!showModal) {
+  if (!component) {
     return null;
   }
 
@@ -33,4 +36,65 @@ export function Modal({ component, showModal, onClose }) {
       </div>
     </div>
   );
+}
+
+function FullCard({ name, onCardClick, message }) {
+  return (
+    <section>
+      <h2>{name}</h2>
+      {onCardClick ? <button onClick={onCardClick}>{message}</button> : null}
+    </section>
+  );
+}
+
+function buildComponent({ abilities, cardRef, gameContext }) {
+  const card = getCardByRef(cardRef);
+  const uiCard = {
+    ...card,
+  };
+
+  let message;
+  let onCardClick;
+
+  if (abilities.length) {
+    message = abilities.map((ability) => ability.message).join("\n");
+    onCardClick = async () => {
+      const actionCtx = {};
+
+      for (const ability of abilities) {
+        actionCtx[ability.ref] = await ability.applyUi?.(gameContext, {
+          cardRef,
+        });
+      }
+      gameContext.dispatch({ type: "CLOSE_MODAL" });
+      gameContext.moves.playCard({
+        cardRef,
+        actionCtx: gameContext.gameState.actionCtx,
+      });
+    };
+  }
+
+  return (
+    <FullCard
+      card={uiCard}
+      message={message}
+      onCardClick={onCardClick}
+    ></FullCard>
+  );
+}
+
+export function mkPlayedCardModal(GameContext) {
+  const gameContext = useContext(GameContext);
+
+  return function PlayedCardModal({ cardRef, onClose }) {
+    const abilities = gameContext.G.abilities
+      .filter((abilityInfo) => !abilityInfo.applied)
+      .map((abilityInfo) => ({
+        ...abilityInfo,
+        ...getAbility(abilityInfo),
+      }));
+    const component = buildComponent({ abilities, cardRef, gameContext });
+
+    return <Modal component={component} onClose={onClose}></Modal>;
+  };
 }
