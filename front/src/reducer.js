@@ -5,8 +5,6 @@ export const initialGame = {
   playCtx: null,
 };
 
-function build
-
 const ACTION_REDUCER = {
   APPLIED_MOVE: (draft) => {
     draft.moveCtx = null;
@@ -17,15 +15,16 @@ const ACTION_REDUCER = {
     if (!draft.playCtx) {
       return;
     }
-    draft.playCtx[draft.playCtx.abilityRef] = {
+    draft.highlightedCardRefs = [];
+    draft.playCtx.abilitiesCtx[draft.playCtx.abilityRef] = {
       cardRef,
     };
   },
-  PLAY_CARD: (draft, { cardAbilities, cardRef }) => {
-    const abilityNeedingContext = cardAbilities.find(
-      (ability) => ability.needContext
-    );
-    if (!abilityNeedingContext) {
+  DEFINE_CHOOSE_POOL: (draft, { cardRefs }) => {
+    draft.highlightedCardRefs = cardRefs;
+  },
+  PLAY_CARD: (draft, { abilities, cardRef }) => {
+    if (!abilities.length) {
       draft.moveCtx = {
         cardRef,
       };
@@ -33,9 +32,12 @@ const ACTION_REDUCER = {
     }
 
     draft.playCtx = {
-      abilityRef: abilityNeedingContext.ref,
-      cardAbilities,
+      abilities,
+      abilitiesCtx: {},
       cardRef,
+      pendingAbilityCtx: {
+        ability: abilities.at(0),
+      },
     };
   },
 };

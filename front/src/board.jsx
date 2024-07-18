@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect } from "react";
 import { useImmerReducer } from "use-immer";
 
 import { initialGame, mkGameReducer } from "./reducer.js";
+import { getAbility } from "./game/ability.js";
 // import { mkPlayedCardModal } from "./modal-card.jsx";
 
 const GameContext = createContext(null);
@@ -161,7 +162,14 @@ function PlayBoard({ playerID }) {
     if (ctx.currentPlayer !== playerID) {
       return;
     }
-    dispatch({ cardRef, type: "PLAY_CARD" });
+    const abilities = G.abilities
+      .filter((abilityInfo) => abilityInfo.cardRef === cardRef)
+      .filter((abilityInfo) => !abilityInfo.applied)
+      .map((abilityInfo) => ({
+        ...abilityInfo,
+        ...getAbility(abilityInfo),
+      }));
+    dispatch({ abilities, cardRef, type: "PLAY_CARD" });
   };
 
   return (
@@ -258,6 +266,9 @@ export function SRGameBoard(bgCtx) {
   };
 
   useEffect(() => {
+    if (gameState.playCtx?.pendingAbilityCtx) {
+      gameState.playCtx?.pendingAbilityCtx.ability.applyUi(gameState);
+    }
     if (gameState.moveName) {
       ctx.moves[gameState.moveName](gameState.moveCtx);
       gameState.dispatch({ type: "APPLIED_MOVE" });
