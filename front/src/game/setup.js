@@ -4,8 +4,8 @@ import {
 } from "../consts.js";
 
 export default function setup({ random, ctx: { numPlayers } }) {
-  const cardNameList = coreSetCardList.map((card) => card.name);
-  const shuffledCardRefList = random.Shuffle(cardNameList);
+  const cardRefList = coreSetCardList.map((card) => card.ref);
+  const shuffledCardRefList = random.Shuffle(cardRefList);
 
   const initialState = {
     abilities: [],

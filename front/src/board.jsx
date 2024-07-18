@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect } from "react";
 import { useImmerReducer } from "use-immer";
 
-import { initialGame, mkGameReducer } from "./reducer.js";
+import { initialGame, gameReducer } from "./reducer.js";
 import { getAbility } from "./game/ability.js";
 // import { mkPlayedCardModal } from "./modal-card.jsx";
 
@@ -46,13 +46,22 @@ function Card({ highlight = 0, label, onCardClick }) {
 }
 
 function Hand({ playerID }) {
-  const { ctx, G, moves } = useContext(GameContext);
+  const { ctx, G, dispatch } = useContext(GameContext);
   const cardRefs = G.hands[playerID];
   const handleClick = (cardRef) => {
     if (ctx.currentPlayer !== playerID) {
       return;
     }
-    moves.playCard({ cardRef });
+    const abilities = G.abilities
+      .filter((abilityInfo) => abilityInfo.cardRef === cardRef)
+      .filter(
+        (abilityInfo) => !abilityInfo.applied && abilityInfo.handleInitContext
+      )
+      .map((abilityInfo) => ({
+        ...abilityInfo,
+        ...getAbility(abilityInfo),
+      }));
+    dispatch({ abilities, cardRef, type: "PLAY_CARD" });
   };
 
   return (
@@ -155,22 +164,8 @@ function PlayerSide({ playerID }) {
 
 function PlayBoard({ playerID }) {
   const gameContext = useContext(GameContext);
-  const { ctx, dispatch, G } = gameContext;
+  const { G } = gameContext;
   const cardRefs = G.plays[playerID];
-
-  const handleCardClick = (cardRef) => {
-    if (ctx.currentPlayer !== playerID) {
-      return;
-    }
-    const abilities = G.abilities
-      .filter((abilityInfo) => abilityInfo.cardRef === cardRef)
-      .filter((abilityInfo) => !abilityInfo.applied)
-      .map((abilityInfo) => ({
-        ...abilityInfo,
-        ...getAbility(abilityInfo),
-      }));
-    dispatch({ abilities, cardRef, type: "PLAY_CARD" });
-  };
 
   return (
     <div
@@ -181,11 +176,7 @@ function PlayBoard({ playerID }) {
       }}
     >
       {cardRefs.map((cardRef) => (
-        <Card
-          key={cardRef}
-          label={cardRef}
-          onCardClick={() => handleCardClick(cardRef)}
-        ></Card>
+        <Card key={cardRef} label={cardRef}></Card>
       ))}
     </div>
   );
@@ -219,7 +210,7 @@ function CentralRow() {
         }}
       >
         {G.tradeRow.map((cardRef) => {
-          const highlight = gameState.highlightedCardRefs.contains(cardRef)
+          const highlight = gameState.highlightedCardRefs.includes(cardRef)
             ? 1
             : 0;
           const handleCardClick = () => {
@@ -255,10 +246,7 @@ function CentralRow() {
 }
 
 export function SRGameBoard(bgCtx) {
-  const [gameState, dispatch] = useImmerReducer(
-    mkGameReducer(ctx),
-    initialGame
-  );
+  const [gameState, dispatch] = useImmerReducer(gameReducer, initialGame);
   const ctx = {
     ...bgCtx,
     dispatch,
@@ -266,12 +254,14 @@ export function SRGameBoard(bgCtx) {
   };
 
   useEffect(() => {
-    if (gameState.playCtx?.pendingAbilityCtx) {
-      gameState.playCtx?.pendingAbilityCtx.ability.applyUi(gameState);
+    if (Number.isInteger(gameState.playCtx?.pendingAbilityIndex)) {
+      gameState.playCtx?.abilities[
+        gameState.playCtx?.pendingAbilityIndex
+      ].handleInitContext(gameState);
     }
     if (gameState.moveName) {
       ctx.moves[gameState.moveName](gameState.moveCtx);
-      gameState.dispatch({ type: "APPLIED_MOVE" });
+      dispatch({ type: "APPLIED_MOVE" });
     }
   }, [ctx]);
 
