@@ -47,7 +47,7 @@ export function scrapCardInTradeRow() {
     message,
     updateGame: ({ G }, { scrapedTradeRowCardRef }) => {
       if (!scrapedTradeRowCardRef) {
-        return;
+        return INVALID_MOVE;
       }
       const cardIndex = G.tradeRow.findIndex(
         (tradeRowCardRef) => tradeRowCardRef === scrapedTradeRowCardRef

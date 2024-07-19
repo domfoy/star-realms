@@ -171,9 +171,11 @@ test("Should let P1 play a battle pod in their hand with trade scraping", () => 
   });
   client.moves.playCard({
     cardRef: "battlePod_1",
-    actionCtx: {
-      battlePod_1_primary_1: { scrapedTradeRowCardRef: "blobCarrier_1" },
-    },
+  });
+  client.moves.playAbility({
+    cardRef: "battlePod_1",
+    abilityCtx: { scrapedTradeRowCardRef: "blobCarrier_1" },
+    abilityRef: "battlePod_1_primary_1",
   });
   const { G } = client.getState();
 

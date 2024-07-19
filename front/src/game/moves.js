@@ -42,39 +42,40 @@ function getAbilityUpdateGame(ctx, abilityRef) {
   return ability.updateGame;
 }
 
-function applyAbility(ctx, abilityRef, abilityCtx) {
+function applyAbility(ctx, abilityRef, abilityCtx = {}) {
   const ability = ctx.G.abilities.find((ability) => ability.ref === abilityRef);
   const updateGame = getAbilityUpdateGame(ctx, abilityRef);
 
   updateGame(ctx, abilityCtx);
-  ability.applied = true;
+  ability.nonApplicable = true;
 }
 
-function checkAbilityIsApplicable(ctx, ability) {
-  if (ability.applied) {
+function checkAbilityIsApplicable(ctx, abilityInfo) {
+  if (abilityInfo.nonApplicable) {
     return false;
   }
-  if (ability.actionType === "primaryAction") {
+  const ability = getAbility(abilityInfo);
+
+  if (ability.applyUi) {
+    return false;
+  }
+  if (abilityInfo.actionType === "primaryAction") {
     return true;
   }
-  if (ability.actionType === "alliedAction") {
+  if (abilityInfo.actionType === "alliedAction") {
     const { G, playerID } = ctx;
-    const cardFaction = cardDictionary[ability.cardName].faction;
+    const cardFaction = cardDictionary[abilityInfo.cardName].faction;
 
     return G.plays[playerID]
-      .filter((cardRef) => cardRef !== ability.cardRef)
+      .filter((cardRef) => cardRef !== abilityInfo.cardRef)
       .map((cardRef) => cardDictionary[getCardNameByRef(cardRef)])
       .some((card) => card.faction === cardFaction);
   }
 }
 
-function applyAbilities(ctx, actionCtx) {
-  const refs = ctx.G.abilities
-    .filter((ability) => checkAbilityIsApplicable(ctx, ability, actionCtx))
-    .map((ability) => ability.ref);
-
-  for (const abilityRef of refs) {
-    applyAbility(ctx, abilityRef, actionCtx?.[abilityRef] ?? {});
+function applyAbilities(ctx, abilityRefs, actionCtx) {
+  for (const abilityRef of abilityRefs) {
+    applyAbility(ctx, abilityRef, actionCtx?.[abilityRef]);
   }
 }
 
@@ -122,7 +123,7 @@ export function buildCardAbilities(cardRef) {
   return cardAbilities;
 }
 
-export function playCard(ctx, { cardRef, actionCtx }) {
+export function playCard(ctx, { cardRef }) {
   const { G, playerID } = ctx;
   const playerHand = G.hands[playerID];
   const cardIndex = playerHand.findIndex(
@@ -137,7 +138,10 @@ export function playCard(ctx, { cardRef, actionCtx }) {
   playerHand.splice(cardIndex, 1);
   playerPlays.push(cardRef);
   G.abilities.push(...buildCardAbilities(cardRef));
-  applyAbilities(ctx, actionCtx);
+  const applicableAbilityRefs = ctx.G.abilities
+    .filter((ability) => checkAbilityIsApplicable(ctx, ability))
+    .map((ability) => ability.ref);
+  applyAbilities(ctx, applicableAbilityRefs);
 }
 
 export function playWholeHand(ctx) {
@@ -223,7 +227,26 @@ export function applyScrapAction(ctx, { cardRef, ...scrapContext }) {
     const updateGame = getAbilityUpdateGame(ctx, abilityInfo.ref);
 
     updateGame(ctx, scrapContext?.[abilityInfo.ref] ?? {});
-    abilityInfo.applied = true;
+    abilityInfo.nonApplicable = true;
   }
   G.scrapDeck.push(cardRef);
+}
+
+export function playAbility(ctx, { abilityRef, cardRef, abilityCtx }) {
+  const { G, playerID } = ctx;
+  const cardIndex = G.plays[playerID].findIndex(
+    (playedCardRef) => playedCardRef === cardRef
+  );
+
+  if (cardIndex < 0) {
+    return INVALID_MOVE;
+  }
+  const abilityInfo = G.abilities.find(
+    (ctxAbilityInfo) => ctxAbilityInfo.ref === abilityRef
+  );
+
+  if (!abilityInfo || abilityInfo.nonApplicable) {
+    return INVALID_MOVE;
+  }
+  applyAbility(ctx, abilityRef, abilityCtx);
 }
