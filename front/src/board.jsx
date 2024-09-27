@@ -257,7 +257,7 @@ export function SRGameBoard(bgCtx) {
     if (Number.isInteger(gameState.playCtx?.pendingAbilityIndex)) {
       gameState.playCtx?.abilities[
         gameState.playCtx?.pendingAbilityIndex
-      ].handleInitContext(gameState);
+      ].handleInitContext(ctx);
     }
     if (gameState.moveName) {
       ctx.moves[gameState.moveName](gameState.moveCtx);

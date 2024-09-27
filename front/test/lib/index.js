@@ -3,16 +3,16 @@ import { Client } from "boardgame.io/client";
 import { SRGame } from "../../src/game/index.js";
 import setup from "../../src/game/setup.js";
 
-export function initClient({
+const random = {
+  Shuffle: (arg) => arg,
+};
+
+export function initGame({
   customState = {},
   customGame = {},
   customRandom = {},
 } = {}) {
-  const random = {
-    Shuffle: (arg) => arg,
-  };
-
-  const scenario = {
+  return {
     ...SRGame,
     setup: () => {
       const initialState = setup({
@@ -27,8 +27,10 @@ export function initClient({
     },
     ...customGame,
   };
+}
 
+export function initClient(ctx) {
   return Client({
-    game: scenario,
+    game: initGame(ctx),
   });
 }

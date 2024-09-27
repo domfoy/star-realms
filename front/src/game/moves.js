@@ -56,7 +56,7 @@ function checkAbilityIsApplicable(ctx, abilityInfo) {
   }
   const ability = getAbility(abilityInfo);
 
-  if (ability.applyUi) {
+  if (ability.handleInitContext) {
     return false;
   }
   if (abilityInfo.actionType === "primaryAction") {

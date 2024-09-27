@@ -62,9 +62,12 @@ function buildComponent({ abilities, cardRef, gameContext }) {
       const actionCtx = {};
 
       for (const ability of abilities) {
-        actionCtx[ability.ref] = await ability.applyUi?.(gameContext, {
-          cardRef,
-        });
+        actionCtx[ability.ref] = await ability.handleInitContext?.(
+          gameContext,
+          {
+            cardRef,
+          }
+        );
       }
       gameContext.dispatch({ type: "CLOSE_MODAL" });
       gameContext.moves.playCard({

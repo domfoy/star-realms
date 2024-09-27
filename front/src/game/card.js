@@ -38,11 +38,16 @@ export function scrapCardInTradeRow() {
   const message = "You may scrap a card in the trade row.";
 
   return {
-    applyUi: async (gameContext) => {
+    handleInitContext: (gameContext) => {
       gameContext.dispatch({
         cardRefs: gameContext.G.tradeRow,
         type: "DEFINE_CHOOSE_POOL",
       });
+    },
+    handleSetContext: ({ cardRef }) => {
+      return {
+        scrapedTradeRowCardRef: cardRef,
+      };
     },
     message,
     updateGame: ({ G }, { scrapedTradeRowCardRef }) => {
